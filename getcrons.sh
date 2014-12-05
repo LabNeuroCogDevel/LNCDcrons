@@ -4,15 +4,18 @@
 # lists cron tasks for known hosts
 # and tracks them
 # changes are printed (and emailed when run inside cron)
-#
 
-for uh in foranw@reese overseer@arnold  \
-          foranw@wallace overseer@skynet \
-          lncd@skynet lncd@arnold \
+# nothing on skynet
+#  lncd@skynet overseer@skynet 
+
+for uh in foranw@reese  foranw@wallace\
+          overseer@arnold   lncd@arnold \
           luna@MEG; do
- ssh $uh 'crontab -l' > crons/$uh.cron
+ ssh $uh 'crontab -l' > crons/$uh.cron 
 done
 
+# cannot log into meson without typing password
+# -- use cron in meson to send meson's cron :)
 cp ~/src/mesonScripts/meson.crontab crons/kaihwang@meson
 
 
