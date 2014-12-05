@@ -5,13 +5,13 @@ HOME=/home/foranw/
 @midnight        /srv/http/freespace/driveBreakdown.sh                 # generate per drive breakdown of disk usage
 @midnight        spaceLeft.sh                                          # check every night for free space issue
 0   12    *  *  3   spaceLeft.sh print                                    # print out space every wed at noon
-10   0    *  *  *   MesonSanityCheck.pl|tee /home/foranw/log/MRC.sanity   # anything wrong with backups (at 12:10)
+#10   0    *  *  *   MesonSanityCheck.pl|tee /home/foranw/log/MRC.sanity   # anything wrong with backups (at 12:10)
 #*   *    *  *  *    echo "$MAILTO $PATH $HOME (test)" > $HOME/ctest
 #*/6  9-20 *  *  1-5 mbsync Work && notmuch new && notmuch search tag:unread && notify-send "$(notmuch search tag:unread)" # && mplayer ~/Downloads/Aol-Gotmail.mp3
 */4  7-20 *  *  1-5 /home/foranw/src/mail/checkmail.bash
 1  0      *  *  5  mbsync -X work # kill anything in trash, remove stuff in annal from exchange
 #*/30 9-22 *  *  1-5 mplayer ~/Downloads/whitenoise.mp3
-15   0    *  *  *   /home/foranw/src/eyds/extra/scannerBars.bash          # create #-codes.csv and #-data.tsv
+#15   0    *  *  *   /home/foranw/src/eyds/extra/scannerBars.bash          # create #-codes.csv and #-data.tsv
 0    1    *  *  *   /home/foranw/src/db-export/renewdb.sh                 # recreate sql database (takes an hour)
 30   2    *  *  *   /home/foranw/src/db-export/mdb2sqlite2mysql.bash      # push sqlite to mysql
 30   1    *  *  *   /home/foranw/src/cron/getcrons.sh                     # print out and track cron scripts 
