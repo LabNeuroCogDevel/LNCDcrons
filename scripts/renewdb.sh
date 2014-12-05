@@ -27,7 +27,6 @@ mkdir schema
 
 mdb-schema $db mysql |sed '/^COMMENT/d'  > schema/schema.sqlite3 
 mdb-tables -1 $db |while read t; do 
-    echo "$t"
     mdb-export -D "%Y-%m-%d %H:%M:%S" -I mysql $db $t > schema/table-${t}.sqlite3
 done
  
@@ -41,7 +40,7 @@ if ! git diff --exit-code || [ ! -r $sqldb ] ; then
    #time cat schema/table-*.sqlite3 | sqlite3 $sqldb
    for f in schema/table-*; do 
     echo $f;
-    time sqlite3 testdb.db < $f;
+    time sqlite3 $sqldb < $f;
    done
 fi
 
