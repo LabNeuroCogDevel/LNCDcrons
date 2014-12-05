@@ -1,0 +1,51 @@
+HOME=/home/foranw/
+# add NewScansFromMeson diskUsage, surf.sh, torque, dcm2nii, freesurfer to path
+PATH="/bin:/usr/bin:/usr/local/bin:/home/foranw/bin:/home/foranw/src/getDataCrons:/data/Luna1/ni_tools/mricron_641/:/usr/local/packages/torque/2.4.16/bin/:/home/foranw/src/freesurfersearcher/:/data/Luna1/ni_tools/mricron/:/usr/local/MATLAB/R2011a/bin/"
+PERL5LIB=/data/Luna1/ni_tools/freesurfer/mni/lib/perl5/5.8.5
+MATLABPATH="/data/Luna1/Raw/Physio/processing/physio_matlab:$MATLABPATH"
+
+MAILTO=willforan@gmail.com
+RAWDIR=/data/Luna1/Raw/
+# min  #hour  #everyday #cmd
+# */1   *     *  *  *   date +\%F # should get a mail every minute when cron is running
+# */1   *     *  *  *   echo $PATH >> ~/crontest
+
+### RSYNC
+# back up processed physio data on skynet
+10     23    *  *  * rsync -azvhi skynet:/Volumes/Phillips/Rest/physio1D /data/Luna1/Reward/physio.originalT1/
+## New data
+
+# fMRI from MR Research Center -- open persistant connection w/expect  b/c pubkey gives name resolution error
+0      23    *  *  *  /data/Luna1/Raw/MRCTR/linkToMRRC_Org  # organize and link MRCTR to MRRC_Org
+# this is done on meson now. see https://github.com/LabNeuroCogDevel/mesonScripts
+#0       0    *  *  *  /home/foranw/bin/bash-42 /home/foranw/src/getDataCrons/NewScansFromMeson.sh  # get MM,Reward,WM;  opens up meson for below
+
+# Nothing new here, old project
+#30      0    *  *  *  rsync -avz --chmod u=rwx,go=rx meson:/disk/mace2/scan_data/WPC-9433/*/ $RAWDIR/conflictPilot/
+
+# use sql database to organize (organize_usingdb) and runs matlab retroTS
+0        1    *  *  * processPhysio.bash 
+
+
+
+# fMRI from NIC  - need to use ssh proxycommand:  only arnold's public facing IP address is allowed access
+0       1    *  *  *  rsync -avz --rsh='ssh' --chmod u=rwx,go=rx     luna@NIC:/data/data1/studies/Luna/    $RAWDIR/NIC/
+30      1    *  *  *  rsync -avz --rsh='ssh' --chmod u=rwx,go=rx  o-hearn@NIC:/data/data1/studies/O-Hearn/ $RAWDIR/Autism_Faces/
+
+# run freesurfer for any multimodal subjects without it -- need to give some time for rsync to finish
+#0       2    *  *  *  surf.sh
+# run freesurfer for any autism faces (/data/Luna1/Autism_Faces/)
+0       3    *  *  *  AutFaceSurf.sh
+
+# MEG  -- cron setup locally there -- this is now for ClockTask
+###0      1   *   *  * rsync -avz /net/sinuhe/data/luna/* wallace:/data/Luna1/Multimodal/MEG_Raw/
+# locally would be
+#30     3   *   *  * rsync -avz MEG:/net/sinuhe/data/luna/* /data/Luna1/Multimodal/MEG_Raw/
+
+# to do a lot of stuff automaticly
+30      4   *   *  * /data/Luna1/EmoClockMEG/99_autoCron.bash
+
+# Weekly status
+#0       1    *  *  1  simpleMesonCheck.sh                               # 1am monday send summery of meson vs WorkMem, MulMod, and  Rewards
+0       1    *  *  3  diskUsage.sh|mail -s "Disk Usage" foranw@upmc.edu # 1am wed    send summery of disk usage
+# vim: set nowrap:

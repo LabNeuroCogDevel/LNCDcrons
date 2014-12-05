@@ -1,0 +1,61 @@
+PATH=/bin:/usr/bin:/usr/local/bin:/Users/overseer/bin:/opt/local/bin/
+MAILTO=overseer,willforan@gmail.com
+# min  #hour  #everyday #cmd
+
+
+## Afni annoyance: log size too big -- rotate at midnight if size is >1M
+0       0    *  *  *  /usr/bin/sudo su lncd -c '/sw/sbin/logrotate -s ~/.afni.logstatus /Users/overseer/afnilogrotate.conf'
+
+# disk space remaining
+0       9    *  *  *  ssh foranw@reese '/srv/http/freespace/plotSpace.R 2>&1|grep -v "ymax not defined"; scp /srv/http/freespace/diskSpaceRPlot.png overseer:/Library/WebServer/Documents/'
+
+# "Correct" new CogEmoSoundsBasic eye tracking data for sarah -- started 2012-02-29 (leap day!)
+# rcn-2 now mounted for lncd only, need to be that user
+# needed to add overseer to wheel group for passwordless sudo
+#  /usr/bin/sudo dseditgroup -o edit -a overseer -t user wheel
+# commented out 20140324WF
+#0       0    *  *  *  /usr/bin/sudo su lncd -c "/Users/overseer/bin/eydCorrect.pl"
+#0       0    *  *  *  /usr/bin/sudo su lncd -c "/Users/lncd/src/cron/mvMEGSoundRecordings.sh"
+
+### RSYNC
+### Local Backups
+# svn tracked code
+10      1    *  *  *  rsync -avz /usr/local/svn_repos/ foranw@wallace.wpic.upmc.edu:/data/Luna1/svn_repos_bkup
+
+## arnold -> samba
+# Kirsten  
+# No space left, stop doing this
+#40      2    *  *  *  rsync -avc                                                 /Volumes/GropeGate/anti_autism    /Volumes/oaclresi_2/Backups 
+#45      2    *  *  *  rsync -av --exclude 'ABIDE/' --exclude 'Raj_Data/'         /Volumes/TX/Autism_Faces   /Volumes/oaclresi_2/Backups
+#50      2    *  *  *  rsync -av --exclude 'S*/3dREMLfit' --exclude 'S*/archives' /Volumes/TX/Autism_SUBI    /Volumes/oaclresi_2/Backups
+# Aarthi
+#45      2    *  *  *  rsync -avz /Volumes/GropeGate/Subcortical_connectivity /Volumes/oaclresi_2/Backups
+
+## arnold -> skynet
+0       3    *  *  *  /usr/bin/sudo su lncd -c "bash -c /Volumes/Governator/ANTISTATELONG/backupFiles.sh"
+# Miya 
+#15      3    *  *  *  rsync -av /Volumes/T800/ring_rew  /Volumes/T800/ebs_dti  skynet:/Volumes/Serena/Backup/Miya/ 
+15      3    *  *  *  rsync -av /Volumes/GropeGate/{ring_rew,ebs_dti}  skynet:/Volumes/Serena/Backup/Miya/ 
+
+## mount bea res
+0      0    *  *  *  /Users/overseer/bin/checkmounts.bash
+@reboot              /Users/overseer/bin/checkmounts.bash
+
+# start database server on reboot
+@reboot              /Users/overseer/src/lncddb3/frontend/mojo/runOnArnold.bash start
+
+###  RAW  ### Handled by wallace --> /data/Luna1/Raw
+## New data 
+# fMRI from NIC -- only likes arnolds public IP
+#15      1    *  *  *  rsync -avz --rsh='ssh' --chmod u=rwx,go=rx luna@136.142.36.60:/data/data1/studies/Luna/ /Volumes/T800/Raw/NIC/
+#30      1    *  *  *  rsync -avz --rsh='ssh' --chmod u=rwx,go=rx  o-hearn@136.142.36.60:/data/data1/studies/O-Hearn/ /Volumes/T800/Raw/Autism_Faces/
+#
+## fMRI from MR Research Center  
+#0       2    *  *  *  NewScansFromMeson.sh #also opens up meson
+#30      2    *  *  *  rsync -avz --chmod u=rwx,go=rx meson:/disk/mace2/scan_data/WPC-9433/*/ /Volumes/T800/Raw/conflictPilot/
+
+
+# All of raw to wallace (which should go to tape)
+#30      4    *  *  *  rsync -avz /Volumes/T800/Raw/ foranw@wallace.wpic.upmc.edu:/data/Luna1/Raw
+
+# vim: set nowrap:

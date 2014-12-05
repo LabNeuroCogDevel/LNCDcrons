@@ -1,0 +1,2 @@
+# Clock task
+0 1 * * * rsync -avz /net/sinuhe/data/luna/* wallace:/data/Luna1/Multimodal/MEG_Raw/
